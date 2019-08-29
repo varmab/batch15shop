@@ -3,41 +3,36 @@ import './Shop.css'
 import Catalog from './Catalog';
 import Cart from './Cart';
 import Checkout from './Checkout';
+import axios from 'axios'
 
 class Shop extends Component{
     constructor(){
         super();
 
-        var items=[
-            {
-                id:1,
-                name:'Shirt',
-                price:100
-            },
-            {
-                id:2,
-                name:'Short',
-                price:100
-            },
-            {
-                id:3,
-                name:'Pant',
-                price:100
-            }
-        ]
-
         this.state={
-            items:items,
+            items:[],
             cartItems:[],
             orderTotal:0
         }
+    }
+
+    componentDidMount(){
+        axios.get('http://api.jsoneditoronline.org/v1/docs/572180836c614dadb4b2eccdc3a33cbc/data?jsonp')
+        .then((results)=>{
+            this.setState({
+                items:results.data.response.products
+            })
+        })
+        .catch((err)=>{
+            console.log(err)
+        })
     }
 
     addToCart=(item)=>{
         console.log(item)
 
         var isItemExists=this.state.cartItems.some((cartItem)=>{
-            return cartItem.id==item.id;
+            return cartItem.productid==item.productid;
         })
 
         if(!isItemExists){
@@ -50,7 +45,7 @@ class Shop extends Component{
             },()=>{
                 this.setState({
                     orderTotal:this.state.cartItems.reduce(function(total,cartItem){
-                        return total+cartItem.price*cartItem.qty;
+                        return total+cartItem.min_list_price*cartItem.qty;
                     },0)
                 })
             })
@@ -58,19 +53,19 @@ class Shop extends Component{
         else
         {
             var existingItem=this.state.cartItems.find((cartItem)=>{
-                return cartItem.id==item.id;
+                return cartItem.productid==item.productid;
             })
 
             existingItem.qty++;
 
             this.setState({
                 cartItems:this.state.cartItems.filter((cartItem)=>{
-                    return cartItem.id!=existingItem.id;
+                    return cartItem.productid!=existingItem.productid;
                 }).concat(existingItem)
             },()=>{
                 this.setState({
                     orderTotal:this.state.cartItems.reduce(function(total,cartItem){
-                        return total+cartItem.price*cartItem.qty;
+                        return total+cartItem.min_list_price*cartItem.qty;
                     },0)
                 })
             })
@@ -83,12 +78,12 @@ class Shop extends Component{
 
         this.setState({
             cartItems:this.state.cartItems.filter((cartItem)=>{
-                return cartItem.id!=item.id;
+                return cartItem.productid!=item.productid;
             })
         },()=>{
             this.setState({
                 orderTotal:this.state.cartItems.reduce(function(total,cartItem){
-                    return total+cartItem.price*cartItem.qty;
+                    return total+cartItem.min_list_price*cartItem.qty;
                 },0)
             })
         })

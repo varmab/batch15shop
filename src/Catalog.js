@@ -10,6 +10,12 @@ class Catalog extends Component{
         }
     }
 
+    componentWillReceiveProps(newProps){
+        this.setState({
+            items:newProps.items
+        })
+    }
+
     addToCart=(item)=>{
         console.log(item)
         this.props.addToCart(item);
